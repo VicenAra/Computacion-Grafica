@@ -110,22 +110,39 @@ if __name__ == "__main__":
 
     # Grafo de escena del background
     mainScene = createScene(pipeline)
+    textureScene = createTextureScene(tex_pipeline)
 
-    hinataImage = createTextureGPUShape(bs.createTextureQuad(1,1), tex_pipeline, getAssetPath("ninho.png"))
 
+    hinataImage = createTextureGPUShape(bs.createTextureQuad(1,1), tex_pipeline, getAssetPath("boy.png"))
     hinataNode = sg.SceneGraphNode("hinata")
     hinataNode.childs = [hinataImage]
+
     # Se instancia el modelo del auto
-    player = Hinata()
+    player = Hinata(hinataNode,controller)
     # Se indican las referencias del nodo y el controller al modelo
-    player.set_model(hinataNode)
-    player.set_controller(controller)
+   # player.set_model(hinataNode)
+   
+   # player.set_controller(controller)
+
 
     # Shape con textura de la carga
-    #garbage = createTextureGPUShape(bs.createTextureQuad(1,1), tex_pipeline, "sprites/bag.png")
+    zombieImage = createTextureGPUShape(bs.createTextureQuad(1,1), tex_pipeline, getAssetPath("zombie.png"))
+    humanImage = createTextureGPUShape(bs.createTextureQuad(1,1), tex_pipeline, getAssetPath("man.png"))
+    storeImage = createTextureGPUShape(bs.createTextureQuad(1,1),tex_pipeline, getAssetPath("store.png"))
 
     # Se crean dos nodos de carga
-    
+    humanNode = sg.SceneGraphNode("human")
+    humanNode.childs = [humanImage]
+    human = Human(0,0.1,0.3,humanNode)
+
+    zombieNode = sg.SceneGraphNode("zombie")
+    zombieNode.childs = [zombieImage]
+    zombie = Zombie(-0.2,0.1,0.2, zombieNode)
+
+    storeNode = sg.SceneGraphNode("store")
+    storeNode.childs = [storeImage]
+    store = Store(3,storeNode)
+
     #garbage1Node = sg.SceneGraphNode("garbage1")
     #garbage1Node.childs = [garbage]
 
@@ -135,16 +152,22 @@ if __name__ == "__main__":
     # Se crean el grafo de escena con textura y se agregan las cargas
     tex_scene = sg.SceneGraphNode("textureScene")
     #tex_scene.childs = [garbage1Node, garbage2Node]
-    tex_scene.childs = [hinataNode]
+    tex_scene.childs = [hinataNode,textureScene,humanNode,zombieNode,storeNode]
     # Se crean los modelos de la carga, se indican su nodo y se actualiza la posicion fija
-   # carga1 = Carga(0.2, -0.55, 0.1)
+    # carga1 = Carga(0.2, -0.55, 0.1)
     #carga1.set_model(garbage1Node)
-    #carga1.update()
-
+    treesNode = sg.findNode(tex_scene,"first trees")
+    trees2Node = sg.findNode(tex_scene,"second trees")
+    trees2 = Trees(4,trees2Node)
+    trees1 = Trees(0,treesNode)
     #carga2 = Carga(0.7, -0.75, 0.1)
     #carga2.set_model(garbage2Node)
     #carga2.update()
+    linesNode = sg.findNode(mainScene, "first middleLines")
+    lines2Node = sg.findNode(mainScene, "second middleLines")
 
+    lines1 = Lines(0,linesNode)
+    lines2 = Lines(2.2,lines2Node)
     # Lista con todas las cargas
     #cargas = [carga1, carga2]
 
@@ -179,14 +202,20 @@ if __name__ == "__main__":
         #player.collision(cargas)
         # Se llama al metodo del player para actualizar su posicion
         player.update(delta)
+        trees1.update(delta)
+        trees2.update(delta)
+        human.update(delta)
+        zombie.update(delta)
+        store.update(delta)
+        print(human.pos[0])
 
-      
+        lines1.update(delta)
+        lines2.update(delta)
 
         # Se dibuja el grafo de escena principal
         glUseProgram(pipeline.shaderProgram)
         sg.drawSceneGraphNode(mainScene, pipeline, "transform")
 
-        #sg.drawSceneGraphNode(secondSceneNode, pipeline, "transform")
 
         # Se dibuja el grafo de escena con texturas
         glUseProgram(tex_pipeline.shaderProgram)
